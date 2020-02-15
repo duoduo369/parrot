@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.reworkplan.mappers.ArticleMapper">
+
+    <resultMap id="ArticleResultMap" type="com.reworkplan.models.Article">
+        <id property="id" column="id"/>
+        <result property="title" column="title"/>
+        <result property="cover" column="cover"/>
+        <result property="description" column="description"/>
+        <result property="is_active" column="is_active"/>
+        <result property="created" column="created" />
+    </resultMap>
+
+    <select id="select" parameterType="hashmap" resultMap="ArticleResultMap">
+        SELECT id, title, cover, description, is_active, created
+        FROM extracter_wxarticle WHERE id = #{id}
+        and is_active=#{isActive} and is_delete=0
+    </select>
+
+    <select id="selectAll" parameterType="hashmap" resultMap="ArticleResultMap">
+        SELECT id, title, cover, description, is_active, created
+        FROM extracter_wxarticle
+        WHERE
+        is_active=#{isActive} and is_delete=0
+        ORDER BY id desc limit #{offset},#{limit}
+    </select>
+
+    <select id="countAll" parameterType="hashmap" resultType="int">
+        SELECT count(*)
+        FROM extracter_wxarticle
+        WHERE
+        is_active=#{isActive} and is_delete=0
+    </select>
+
+</mapper>
