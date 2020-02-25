@@ -8,7 +8,9 @@ import io.dropwizard.setup.Environment;
 public class InjectorFactory {
     public Injector get(ParrotConfiguration configuration, Environment environment) {
         Injector intjector = Guice.createInjector(
-                new ApplicationModule(configuration, environment)
+                new ApplicationModule(configuration, environment),
+                new MysqlMapperModule(configuration, environment),
+                new ServiceModule()
         );
         return intjector ;
     }

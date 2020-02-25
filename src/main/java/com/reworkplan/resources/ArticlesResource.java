@@ -1,11 +1,13 @@
 package com.reworkplan.resources;
 
 import com.codahale.metrics.annotation.Timed;
+import com.google.inject.Inject;
 import com.reworkplan.common.Constants;
 import com.reworkplan.common.response.MetaListResponse;
 import com.reworkplan.common.response.MetaMapperResponse;
 import com.reworkplan.mappers.ArticleMapper;
 import com.reworkplan.models.Article;
+import com.reworkplan.service.ArticleService;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
 
@@ -22,10 +24,11 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 @Path(BasePath.ARTICLE_API)
 @Produces(APPLICATION_JSON)
 public class ArticlesResource {
-    private final SqlSessionFactory sessionFactory;
+    private final ArticleService articleService;
 
-    public ArticlesResource(SqlSessionFactory sessionFactory) {
-        this.sessionFactory = sessionFactory;
+    @Inject
+    public ArticlesResource(ArticleService articleService) {
+        this.articleService = articleService;
     }
 
     @GET
@@ -34,14 +37,11 @@ public class ArticlesResource {
                                 @DefaultValue(Constants.DEFAULT_PARAM_LIMIT) @QueryParam("limit") Integer limit){
         MetaListResponse response = new MetaListResponse();
         response.putMeta("count", 0);
-        try (SqlSession session = sessionFactory.openSession()) {
-            ArticleMapper articleMapper = session.getMapper(ArticleMapper.class);
-            Boolean isActive = true;
-            Integer count = articleMapper.countAll(isActive);
-            List<Article> articles = articleMapper.selectAll(isActive, offset, limit);
-            response.putMeta("count", count);
-            response.setData(articles);
-        }
+        Boolean isActive = true;
+        Integer count = articleService.count(isActive);
+        List<Article> articles = articleService.getList(isActive, offset, limit);
+        response.putMeta("count", count);
+        response.setData(articles);
         return response;
     }
 
@@ -50,15 +50,9 @@ public class ArticlesResource {
     @Timed
     public MetaMapperResponse get(@NotNull @PathParam("id") Integer articleId) {
         MetaMapperResponse response = new MetaMapperResponse();
-        try (SqlSession session = sessionFactory.openSession()) {
-            ArticleMapper articleMapper = session.getMapper(ArticleMapper.class);
-            Boolean isActive = true;
-            Article article = articleMapper.select(articleId, isActive);
-            System.out.println("==============");
-            System.out.println(articleId);
-            System.out.println(article);
-            response.setData(article);
-        }
+        Boolean isActive = true;
+        Article article = articleService.get(articleId, isActive);
+        response.setData(article);
         return response;
     }
 }

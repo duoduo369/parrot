@@ -1,6 +1,8 @@
 package com.reworkplan;
 
+import com.google.inject.Injector;
 import com.reworkplan.bundles.CorsBundle;
+import com.reworkplan.bundles.GuiceBundle;
 import com.reworkplan.bundles.MysqlBundle;
 import com.reworkplan.config.ParrotConfiguration;
 import com.reworkplan.mappers.ArticleMapper;
@@ -17,34 +19,33 @@ import tw.hyl.common.jersey.jodatime.JodaTimeParamConverterProvider;
 
 public class ParrotApplication extends Application<ParrotConfiguration> {
     private final InjectorFactory injectorFactory;
-    private final MysqlBundle mysqlBundle;
 
     public ParrotApplication() {
         this.injectorFactory = new InjectorFactory();
-        this.mysqlBundle = new MysqlBundle();
     }
 
     public ParrotApplication(InjectorFactory injectorFactory) {
         this.injectorFactory = injectorFactory;
-        this.mysqlBundle = new MysqlBundle();
     }
     @Override
     public void initialize(Bootstrap<ParrotConfiguration> bootstrap) {
+        MysqlBundle mysqlBundle = new MysqlBundle();
+
         bootstrap.addBundle(new TemplateConfigBundle());
         bootstrap.addBundle(new Java8Bundle());
         bootstrap.addBundle(new MultiPartBundle());
-        bootstrap.addBundle(new CorsBundle());
         bootstrap.addBundle(mysqlBundle);
+        bootstrap.addBundle(new GuiceBundle(injectorFactory, mysqlBundle));
+        bootstrap.addBundle(new CorsBundle());
         super.initialize(bootstrap);
     }
 
     @Override
     public void run(ParrotConfiguration configuration, Environment environment) throws Exception {
-        SqlSessionFactory sessionFactory = mysqlBundle.getSqlSessionFactory();
-        sessionFactory.getConfiguration().addMapper(ArticleMapper.class);
 
+        Injector injector = configuration.getInjector();
         environment.jersey().register(JodaTimeParamConverterProvider.class);
-        environment.jersey().register(new ArticlesResource(sessionFactory));
+        environment.jersey().register(injector.getInstance(ArticlesResource.class));
     }
     public static void main(String[] args) throws Exception {
         new ParrotApplication(new InjectorFactory()).run(args);
