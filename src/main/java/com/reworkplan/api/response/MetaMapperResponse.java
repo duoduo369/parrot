@@ -1,4 +1,4 @@
-package com.reworkplan.common.response;
+package com.reworkplan.api.response;
 
 import java.util.HashMap;
 

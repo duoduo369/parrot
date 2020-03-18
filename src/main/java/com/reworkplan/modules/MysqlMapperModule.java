@@ -7,6 +7,7 @@ import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 import com.reworkplan.config.ParrotConfiguration;
 import com.reworkplan.mappers.ArticleMapper;
+import com.reworkplan.mappers.UserMapper;
 import com.reworkplan.modules.provider.MysqlMapperProvider;
 import io.dropwizard.setup.Environment;
 import org.apache.ibatis.session.SqlSessionFactory;
@@ -26,6 +27,7 @@ public class MysqlMapperModule extends AbstractModule {
     @Override
     protected void configure() {
         addMapper(ArticleMapper.class);
+        addMapper(UserMapper.class);
     }
 
     @Provides

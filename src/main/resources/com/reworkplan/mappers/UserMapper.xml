@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.reworkplan.mappers.UserMapper">
+
+    <resultMap id="UserResultMap" type="com.reworkplan.models.User">
+        <id property="id" column="id"/>
+        <result property="username" column="username"/>
+        <result property="avatar" column="avatar"/>
+        <result property="isActive" column="is_active"/>
+        <result property="isSuperUser" column="is_superuser"/>
+        <result property="password" column="password"/>
+    </resultMap>
+
+    <select id="selectByUsername" parameterType="hashmap" resultMap="UserResultMap">
+        SELECT id, username, avatar, is_active, is_superuser, password
+        FROM account_user WHERE username = #{username}
+    </select>
+
+</mapper>

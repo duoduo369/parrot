@@ -2,26 +2,23 @@ package com.reworkplan.resources;
 
 import com.codahale.metrics.annotation.Timed;
 import com.google.inject.Inject;
+import com.reworkplan.auth.NoAuth;
 import com.reworkplan.common.Constants;
-import com.reworkplan.common.response.MetaListResponse;
-import com.reworkplan.common.response.MetaMapperResponse;
-import com.reworkplan.mappers.ArticleMapper;
+import com.reworkplan.api.response.MetaListResponse;
+import com.reworkplan.api.response.MetaMapperResponse;
 import com.reworkplan.models.Article;
+import com.reworkplan.models.User;
 import com.reworkplan.service.ArticleService;
-import org.apache.ibatis.session.SqlSession;
-import org.apache.ibatis.session.SqlSessionFactory;
+import io.dropwizard.auth.Auth;
 
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.*;
-import javax.ws.rs.core.Response;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 
-@Path(BasePath.ARTICLE_API)
+@Path(BasePath.ARTICLE)
 @Produces(APPLICATION_JSON)
 public class ArticlesResource {
     private final ArticleService articleService;
@@ -31,6 +28,7 @@ public class ArticlesResource {
         this.articleService = articleService;
     }
 
+    @NoAuth
     @GET
     @Timed
     public MetaListResponse get(@DefaultValue(Constants.DEFAULT_PARAM_OFFSET) @QueryParam("offset") Integer offset,
@@ -45,10 +43,22 @@ public class ArticlesResource {
         return response;
     }
 
+    @NoAuth
     @Path("/{id}")
     @GET
     @Timed
     public MetaMapperResponse get(@NotNull @PathParam("id") Integer articleId) {
+        MetaMapperResponse response = new MetaMapperResponse();
+        Boolean isActive = true;
+        Article article = articleService.get(articleId, isActive);
+        response.setData(article);
+        return response;
+    }
+
+    @Path("/{id}/secret")
+    @GET
+    @Timed
+    public MetaMapperResponse getSecretArticle(@Auth User user, @NotNull @PathParam("id") Integer articleId) {
         MetaMapperResponse response = new MetaMapperResponse();
         Boolean isActive = true;
         Article article = articleService.get(articleId, isActive);
